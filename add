@@ -1,0 +1,42 @@
+#!/bin/bash
+echo 'Enter the question to go on the front of the card: '
+read question 
+echo 'Enter the answer to go on the back of the card: '
+read answer
+echo "$question | $answer" >> flashcards.txt
+
+# while read line
+# do
+    
+#     if [[ $STATE == "question" ]]
+#     then
+#         CARD_TYPE=$(card_difficulty)
+#         cat "${CARD_TYPE}_flashcards.txt" | sort -R | head -1 > card.txt
+
+#         QUESTION=$(cat card.txt | grep -P -o "[^\|]*\|" | grep -Po "[^|]+")
+#         ANSWER=$(cat card.txt | grep -Po "\|.+" | grep -Po "[^\|]+")
+        
+
+#         echo -n "Frontside: " $QUESTION
+#         STATE=answer
+    
+#     elif [[ $STATE == "answer" ]]
+#     then
+#         if [[ $line == "" ]]
+#         then
+#           echo "Backside: " $ANSWER
+#             STATE=question
+#             echo
+#         else
+#             echo "Please only hit enter to see the answer"
+#         fi
+#     fi
+
+#     if [[ "$line" == EOF ]]
+#     then
+#         break
+#     fi
+
+# done
+
+# rm card.txt
