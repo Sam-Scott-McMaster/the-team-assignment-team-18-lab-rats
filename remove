@@ -1,0 +1,51 @@
+#!/bin/bash
+echo '-=-=-=-=- CARD LIST -=-=-=-=-'
+cat -n flashcards.txt | sort
+echo ''
+echo 'Select the card number(s) you would like to delete: '
+read deletionNum 
+echo ''
+for word in $deletionNum
+do
+    cat -n flashcards.txt | sort | head -$word | tail -1
+done
+
+echo ''
+echo 'Are you sure you would like to delete this selection? (y/n)'
+while read confirmation
+do
+    if [[ $confirmation == "y" ]]
+    then
+        for word in $deletionNum
+        do
+            CHECK=$(cat flashcards.txt | head -$word | tail -1)
+            #cat flashcards.txt | grep -v "$CHECK"  # | tee flashcards.txt
+
+            x=$(cat flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > flashcards.txt
+
+            x=$(cat easy_flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > easy_flashcards.txt
+
+            x=$(cat good_flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > good_flashcards.txt
+
+            x=$(cat hard_flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > hard_flashcards.txt
+
+            x=$(cat again_flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > again_flashcards.txt
+
+            
+        done
+        
+        break
+    elif [[ $confirmation == "n" ]]
+    then
+        echo "ok then I won't :(" 
+        break
+    else
+        echo "Invalid input. Try again."
+    fi
+    echo 'Are you sure you would like to delete this card? (y/n)'
+done
