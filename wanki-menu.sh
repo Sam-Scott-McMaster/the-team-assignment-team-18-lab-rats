@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Create base directory 
+# Create base directory if doesn't exist already
 BASE_DIR="$HOME/WANKI"
 mkdir -p "$HOME/WANKI"
 
@@ -8,10 +8,10 @@ main_menu(){
     echo "Welcome to WANKI!"
     echo "Select a course or add a new one:"
 
-    ## List current courses
     local i=1
     courses=()
 
+    # List current courses
     for course_dir in "$BASE_DIR"/*/; do
         course_name=$(basename "$course_dir")
         echo "($i) $course_name"
@@ -25,6 +25,7 @@ main_menu(){
     echo "($((i+2))) Exit"
     read -p "Enter choice: " choice
 
+    # Call appropriate function based on user's selection
     if (( choice == i )); then
         create_course
     elif (( choice == i+1)); then
@@ -53,6 +54,7 @@ create_course() {
     fi
 }
 
+# Function to remove course
 remove_course() {
     echo "Select a course to remove:"
 
