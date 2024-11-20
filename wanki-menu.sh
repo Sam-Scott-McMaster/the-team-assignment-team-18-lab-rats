@@ -30,6 +30,7 @@ main_menu(){
     # Exit option
     echo "($i) Exit"
 
+    # Prompt user for choice
     read -p "Enter your choice: " choice
 
     # Call appropriate function based on user's selection
@@ -42,7 +43,6 @@ main_menu(){
         exit 0
     elif (( choice >= 3 && choice < i )); then
         selected_course="${courses[$choice]}"
-        course_menu "$selected_course"
     else
         echo "Invalid option. Returning to main menu."
     fi
@@ -100,13 +100,6 @@ remove_course() {
     else
         echo "Invalid choice. Returning to main menu."
     fi
-}
-
-# Placeholder for the course menu
-course_menu() {
-    local course_name="$1"
-    echo "You selected the course '$course_name'."
-    # Add functionality for the course menu here
 }
 
 # Run the main menu in a loop
