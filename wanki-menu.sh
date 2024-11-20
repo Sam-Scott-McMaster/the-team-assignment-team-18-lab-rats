@@ -1,45 +1,52 @@
 #!/bin/bash
 
-# Create base directory if doesn't exist already
+# Create base directory in user's home if it doesn't exist already
 BASE_DIR="$HOME/WANKI"
-mkdir -p "$HOME/WANKI"
+mkdir -p "$BASE_DIR"
 
 main_menu(){
+    echo "-----------------"
     echo "Welcome to WANKI!"
-    echo "Select a course or add a new one:"
+    echo "-----------------"
+    echo "Select an option:"
 
-    local i=1
+    # General options
+    echo "(1) Add new course"
+    echo "(2) Remove a course"
+
+    # List all courses in WANKI directory
+    local i=3
     courses=()
 
-    # List current courses
     for course_dir in "$BASE_DIR"/*/; do
-        course_name=$(basename "$course_dir")
-        echo "($i) $course_name"
-        courses[$i]=$course_name
-        ((i++))
+        if [ -d "$course_dir" ]; then
+            course_name=$(basename "$course_dir")
+            echo "($i) $course_name"
+            courses[$i]="$course_name"
+            ((i++))
+        fi
     done
 
-    # Option to add new course
-    echo "($i) Add new course"
-    echo "($((i+1))) Remove a course"
-    echo "($((i+2))) Exit"
-    read -p "Enter choice: " choice
+    # Exit option
+    echo "($i) Exit"
+
+    read -p "Enter your choice: " choice
 
     # Call appropriate function based on user's selection
-    if (( choice == i )); then
+    if (( choice == 1 )); then
         create_course
-    elif (( choice == i+1)); then
+    elif (( choice == 2 )); then
         remove_course
-    elif (( choice == i+2)); then
+    elif (( choice == i )); then
+        echo "Exiting..."
         exit 0
-    elif (( choice >= 1 && choice < i )); then
+    elif (( choice >= 3 && choice < i )); then
         selected_course="${courses[$choice]}"
         course_menu "$selected_course"
     else
         echo "Invalid option. Returning to main menu."
     fi
 }
-
 
 # Function to create a new course
 create_course() {
@@ -54,13 +61,14 @@ create_course() {
     fi
 }
 
-# Function to remove course
+# Function to remove a course
 remove_course() {
     echo "Select a course to remove:"
 
     local i=1
     courses=()
 
+    # List courses
     for course_dir in "$BASE_DIR"/*/; do
         if [ -d "$course_dir" ]; then
             course_name=$(basename "$course_dir")
@@ -70,11 +78,13 @@ remove_course() {
         fi
     done
 
+    # Check if no courses exist
     if (( i == 1 )); then
         echo "No courses available to remove."
         return
     fi
 
+    # Prompt for removal
     read -p "Enter the number of the course to remove: " choice
     if (( choice >= 1 && choice < i )); then
         selected_course="${courses[$choice]}"
@@ -92,6 +102,16 @@ remove_course() {
     fi
 }
 
+# Placeholder for the course menu
+course_menu() {
+    local course_name="$1"
+    echo "You selected the course '$course_name'."
+    # Add functionality for the course menu here
+}
+
+# Run the main menu in a loop
 while true; do
     main_menu
 done
+
+
