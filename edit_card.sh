@@ -28,15 +28,20 @@ edit_answer() {
     fi
 }
 
-echo "What would you like to edit, a question or an answer?"
-read Q_or_A
-if [[ $Q_or_A == "question" ]]; then
-    edit_question
-elif [[ $Q_or_A == "answer" ]]; then
-    edit_answer
-elif [[ $Q_or_A == "both" ]]; then
-    edit_question
-    edit_answer
-else
-    echo "Invalid option. Please type 'question', 'answer', or 'both'."
-fi
+Q_or_A=""
+while [[ $Q_or_A != "question" && $Q_or_A != "answer" && $Q_or_A != "both" ]]
+do
+    echo "What would you like to edit, a question or an answer?"
+    read Q_or_A
+    if [[ $Q_or_A == "question" ]]; then
+        edit_question
+    elif [[ $Q_or_A == "answer" ]]; then
+        edit_answer
+    elif [[ $Q_or_A == "both" ]]; then
+        edit_question
+        edit_answer
+    else
+        echo "Invalid option. Please type 'question', 'answer', or 'both'."
+        Q_or_A=""
+    fi
+done
