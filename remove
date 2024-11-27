@@ -14,7 +14,7 @@ echo ''
 echo 'Are you sure you would like to delete this selection? (y/n)'
 while read confirmation
 do
-    if [[ $confirmation == "y" ]]
+    if [[ $confirmation == "y" || $confirmation == "Y" ]]
     then
         for word in $deletionNum
         do
@@ -40,7 +40,7 @@ do
         done
         
         break
-    elif [[ $confirmation == "n" ]]
+    elif [[ $confirmation == "n" || $confirmation == "N" ]]
     then
         echo "ok then I won't :(" 
         break
