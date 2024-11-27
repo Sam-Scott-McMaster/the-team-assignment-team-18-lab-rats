@@ -1,13 +1,16 @@
 #!/bin/bash
+
+COURSE_DIR="$HOME/WANKI/$1"
+
 echo '-=-=-=-=- CARD LIST -=-=-=-=-'
-cat -n flashcards.txt | sort
+cat -n $COURSE_DIR/flashcards.txt | sort
 echo ''
 echo 'Select the card number(s) you would like to delete: '
 read deletionNum 
 echo ''
 for word in $deletionNum
 do
-    cat -n flashcards.txt | sort | head -$word | tail -1
+    cat -n $COURSE_DIR/flashcards.txt | sort | head -$word | tail -1
 done
 
 echo ''
@@ -18,23 +21,23 @@ do
     then
         for word in $deletionNum
         do
-            CHECK=$(cat flashcards.txt | head -$word | tail -1)
+            CHECK=$(cat $COURSE_DIR/flashcards.txt | head -$word | tail -1)
             #cat flashcards.txt | grep -v "$CHECK"  # | tee flashcards.txt
 
-            x=$(cat flashcards.txt) 
-            echo "$x" | grep -v "$CHECK" > flashcards.txt
+            x=$(cat $COURSE_DIR/flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > $COURSE_DIR/flashcards.txt
 
-            x=$(cat easy_flashcards.txt) 
-            echo "$x" | grep -v "$CHECK" > easy_flashcards.txt
+            x=$(cat $COURSE_DIR/easy_flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > $COURSE_DIR/easy_flashcards.txt
 
-            x=$(cat good_flashcards.txt) 
-            echo "$x" | grep -v "$CHECK" > good_flashcards.txt
+            x=$(cat $COURSE_DIR/good_flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > $COURSE_DIR/good_flashcards.txt
 
-            x=$(cat hard_flashcards.txt) 
-            echo "$x" | grep -v "$CHECK" > hard_flashcards.txt
+            x=$(cat $COURSE_DIR/hard_flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > $COURSE_DIR/hard_flashcards.txt
 
-            x=$(cat again_flashcards.txt) 
-            echo "$x" | grep -v "$CHECK" > again_flashcards.txt
+            x=$(cat $COURSE_DIR/again_flashcards.txt) 
+            echo "$x" | grep -v "$CHECK" > $COURSE_DIR/again_flashcards.txt
 
             
         done

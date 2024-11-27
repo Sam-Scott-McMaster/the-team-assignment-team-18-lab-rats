@@ -1,0 +1,129 @@
+#!/bin/bash
+
+BASE_DIR="$HOME/WANKI"
+
+card_difficulty() {
+    WEIGHT=$((1 + $RANDOM % 100))
+
+    # 5% chance of showing 'easy' next card
+    if [[ WEIGHT -gt 0 && WEIGHT -le 5 ]]
+    then
+        DIFFICULTY=easy
+
+    # 10% chance of showing 'good' next card
+    elif [[ WEIGHT -gt 5 && WEIGHT -le 15 ]]
+    then
+        DIFFICULTY=good
+
+    # 35% chance of showing 'good' next card
+    elif [[ WEIGHT -gt 15 && WEIGHT -le 50 ]]
+    then
+        DIFFICULTY=hard
+
+    # 50% chance of showing 'good' next card
+    else
+        DIFFICULTY=again
+    fi
+
+    echo $DIFFICULTY
+}
+
+# Begin with a question
+STATE=question
+CARD_TEXT=""
+
+# IS_EMPTY= cat "${BASE_DIR}/$1/flashcards.txt"
+# if [[ "$IS_EMPTY" == "" ]]
+# then
+#     echo 'No flashcards in course. Add some to get started.'
+#     exit 0
+# fi
+
+echo "Hit Enter to begin!"
+
+while read line
+do
+
+    # End testing mode when 'q' or EOF
+    if [[ "$line" == EOF || "$line" == "q" ]]
+    then
+        exit 0
+    fi
+    
+    if [[ $STATE == "question" ]]
+    then
+
+        # Random generate a card difficulty using the scheme above
+        # if no card exists within that difficulty category, regenerate it
+        while [[ $CARD_TEXT == "" ]]
+        do
+            CARD_TYPE=$(card_difficulty)
+          # get a random card from the random card category
+            cat "${BASE_DIR}/$1/${CARD_TYPE}_flashcards.txt" | sort -R | head -1 > card.txt
+            CARD_TEXT=$(cat card.txt)
+        done
+
+        # Extract information from the card
+        QUESTION=$(cat card.txt | grep -P -o "[^\|]*\|" | grep -Po "[^|]+")
+        ANSWER=$(cat card.txt | grep -Po "\|.+" | grep -Po "[^\|]+")
+
+        # Change states
+        echo "------------------------"
+        echo -n "Frontside: " $QUESTION
+        STATE=answer
+    
+    elif [[ $STATE == "answer" ]]
+    then
+        if [[ $line == "" ]]  # only receive enter character to show backside
+        then
+            # Show backside and prompt for difficulty rating before changing state
+            echo "Backside: " $ANSWER
+            echo "------------------------"
+            STATE=selectDifficulty
+            echo
+            echo "Difficulty ('e': easy, 'g': good, 'h': hard, 'a': again): "
+        else
+            echo "Please only hit enter to see the answer"
+        fi
+
+    elif [[ $STATE == "selectDifficulty" ]]
+    then
+        # Make sure user specifies an accepted difficulty rating
+        if [[ $line =~ ^[eEgGhHaA]$ ]]
+        then
+            STATE=question
+
+            # Remove the card from its existing flashcard category file
+            grep -vxF "${CARD_TEXT}" < ${CARD_TYPE}_flashcards.txt > temp && mv temp ${CARD_TYPE}_flashcards.txt
+           
+            # Append the card content to the end of the file corresponding to its new difficulty as specified by the user
+            if [[ $line =~ [eE] ]]
+            then
+                sed -i -e '$a\'"${CARD_TEXT}" easy_flashcards.txt
+            
+            elif [[ $line =~ [gG] ]]
+            then
+                sed -i -e '$a\'"${CARD_TEXT}" good_flashcards.txt
+
+            elif [[ $line =~ [hH] ]]
+            then
+                sed -i -e '$a\'"${CARD_TEXT}" hard_flashcards.txt
+
+            else
+                sed -i -e '$a\'"${CARD_TEXT}" again_flashcards.txt
+            fi
+
+            # Before continuing to the next flash card
+            echo "Hit Enter to continue or type 'q' to exit"
+            CARD_TEXT=""
+        else
+            echo "Please enter one of the listed options"        
+        fi
+    fi
+
+done
+
+rm card.txt
+
+
+

@@ -3,3 +3,4 @@ What factors regulate force production of a muscle? | Muscle LENGTH, action pote
 How do action potentials affect force production of the muscle? | action potentials cause release of Ca2+ into cells -- more action potentials means the sarcoplasmic reticulum remains open, so more Ca2+ enters muscle cells.
 What are the names of the two spinal rami? What do they each innervate? | Dorsal (posterior) rami: deep back muscles, zygapophyseal joints; Ventral (anterior) Rami: everything else!
 What is C8 and where is it located? | A spinal nerve! Below the cervical vertebra (C1-C7) and above the thoracic/lumbar vertebra
+question | answereilfue
