@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "Are you SURE you want to reset all the difficulties? y/n"
+read ans
+if [[ $ans == 'y' ]]
+then
+    cat easy_flashcards.txt >> flashcards.txt
+    echo -n > easy_flashcards.txt
+    cat again_flashcards.txt >> flashcards.txt
+    echo -n > again_flashcards.txt
+    cat hard_flashcards.txt >> flashcards.txt
+    echo -n > hard_flashcards.txt
+    cat good_flashcards.txt >> flashcards.txt
+    echo -n > good_flashcards.txt
+fi
+
+

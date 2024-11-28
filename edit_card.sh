@@ -1,26 +1,29 @@
 #!/bin/bash
 
+# Define the files for each difficulty level
 FILES=("flashcards.txt" "again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
+DIFFICULTIES=("easy" "hard" "again" "good")
 
-# Display all cards with global line numbers
+# Function to display all cards with global line numbers
 display_cards() {
     echo '-=-=-=-=- CARD LIST -=-=-=-=-'
     local global_line=1  # Start global numbering
 
-    # Loop through each file
+    # Loop through each file and display the cards with global line numbers
     for file in "${FILES[@]}"; do
         if [[ -f "$file" ]]; then
             echo "Deck: $file"
             while IFS= read -r line; do
-                echo "$global_line: $line (from $file)"
+                echo "$global_line: $line"
                 global_line=$((global_line + 1))  # Increment global line count
             done < "$file"
         fi
+        echo ""
     done
     echo ""
 }
 
-# Get the file and local line number for a global line number
+# Function to get the file and local line for a global line number
 get_file_and_local_line() {
     local target_global_line=$1
     local global_line=1
@@ -46,7 +49,7 @@ get_file_and_local_line() {
     echo "ERROR: Line $target_global_line not found."
 }
 
-# Edit a specific line in a specific file
+# Function to edit a specific flashcard
 edit_flashcard() {
     local global_line=$1
 
@@ -100,7 +103,26 @@ edit_flashcard() {
     # Handle invalid input
     else
         echo "Invalid choice. No changes made."
+        return
     fi
+
+    # Prompt to change the difficulty of the card
+    echo "Select the new difficulty for this card: (easy/hard/again/good)"
+    read -r new_difficulty
+
+    # Check if the input is valid
+    if [[ ! " ${DIFFICULTIES[@]} " =~ " ${new_difficulty} " ]]; then
+        echo "Invalid difficulty selected. No changes made."
+        return
+    fi
+
+    # Remove the card from the current file
+    sed -i "${local_line}d" "$file"
+
+    # Append the card to the appropriate difficulty file
+    local new_file="${new_difficulty}_flashcards.txt"
+    echo "$new_line" >> "$new_file"
+    echo "Card moved to $new_difficulty deck."
 }
 
 # Main loop
