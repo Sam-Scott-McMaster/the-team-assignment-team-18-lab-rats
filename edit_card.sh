@@ -1,47 +1,122 @@
 #!/bin/bash
 
-edit_question() {
-    echo "Type the original question, then hit enter:"
-    read OG_QUESTION
-    question=$(grep -c "${OG_QUESTION}" flashcards.txt)
-    if [[ $question -eq 0 ]]; then
-        echo "ERROR: QUESTION NOT FOUND"
-        return 1
+FILES=("flashcards.txt" "again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
+
+# Display all cards with global line numbers
+display_cards() {
+    echo '-=-=-=-=- CARD LIST -=-=-=-=-'
+    local global_line=1  # Start global numbering
+
+    # Loop through each file
+    for file in "${FILES[@]}"; do
+        if [[ -f "$file" ]]; then
+            echo "Deck: $file"
+            while IFS= read -r line; do
+                echo "$global_line: $line (from $file)"
+                global_line=$((global_line + 1))  # Increment global line count
+            done < "$file"
+        fi
+    done
+    echo ""
+}
+
+# Get the file and local line number for a global line number
+get_file_and_local_line() {
+    local target_global_line=$1
+    local global_line=1
+
+    # Check each file
+    for file in "${FILES[@]}"; do
+        if [[ -f "$file" ]]; then
+            local line_count=$(wc -l < "$file")  # Count total lines in this file
+
+            # Check if the global line is in this file
+            if (( target_global_line >= global_line && target_global_line < global_line + line_count )); then
+                local local_line=$((target_global_line - global_line + 1))  # Calculate local line number
+                echo "$file:$local_line"
+                return
+            fi
+
+            # Update global line for the next file
+            global_line=$((global_line + line_count))
+        fi
+    done
+
+    # If no matching line is found
+    echo "ERROR: Line $target_global_line not found."
+}
+
+# Edit a specific line in a specific file
+edit_flashcard() {
+    local global_line=$1
+
+    # Find the file and local line for the global line number
+    local file_and_local_line
+    file_and_local_line=$(get_file_and_local_line "$global_line")
+    if [[ "$file_and_local_line" == ERROR* ]]; then
+        echo "$file_and_local_line"
+        return
+    fi
+
+    # Extract file name and local line number
+    local file=${file_and_local_line%%:*}
+    local local_line=${file_and_local_line##*:}
+
+    # Get the current content of the line
+    local current_line=$(sed -n "${local_line}p" "$file")
+    echo "Deck: $file"
+    echo "Current Line: $current_line"
+
+    # Prompt user for what to edit
+    echo "What would you like to edit? (question/answer/both)"
+    read -r edit_choice
+
+    # Edit the question
+    if [[ "$edit_choice" == "question" ]]; then
+        echo "Type the new question:"
+        read -r new_question
+        local new_line="${new_question} | ${current_line#*| }"
+        sed -i "${local_line}s/.*/${new_line}/" "$file"
+        echo "Question updated successfully in $file."
+
+    # Edit the answer
+    elif [[ "$edit_choice" == "answer" ]]; then
+        echo "Type the new answer:"
+        read -r new_answer
+        local new_line="${current_line%| *} | ${new_answer}"
+        sed -i "${local_line}s/.*/${new_line}/" "$file"
+        echo "Answer updated successfully in $file."
+
+    # Edit both the question and answer
+    elif [[ "$edit_choice" == "both" ]]; then
+        echo "Type the new question:"
+        read -r new_question
+        echo "Type the new answer:"
+        read -r new_answer
+        local new_line="${new_question} | ${new_answer}"
+        sed -i "${local_line}s/.*/${new_line}/" "$file"
+        echo "Card updated successfully in $file."
+
+    # Handle invalid input
     else
-        echo "Type the new question, then hit enter:"
-        read NEW_QUESTION
-        sed -i "s/${OG_QUESTION}/${NEW_QUESTION}/1" flashcards.txt && echo "Question updated successfully."
+        echo "Invalid choice. No changes made."
     fi
 }
 
-edit_answer() {
-    echo "Type the original answer, then hit enter:"
-    read OG_ANSWER
-    answer=$(grep -c "${OG_ANSWER}" flashcards.txt)
-    if [[ $answer -eq 0 ]]; then
-        echo "ERROR: ANSWER NOT FOUND"
-        return 1
-    else
-        echo "Type the new answer, then hit enter:"
-        read NEW_ANSWER
-        sed -i "s/${OG_ANSWER}/${NEW_ANSWER}/1" flashcards.txt && echo "Answer updated successfully."
-    fi
-}
+# Main loop
+while true; do
+    display_cards  # Show all cards with global numbering
 
-Q_or_A=""
-while [[ $Q_or_A != "question" && $Q_or_A != "answer" && $Q_or_A != "both" ]]
-do
-    echo "What would you like to edit, a question or an answer?"
-    read Q_or_A
-    if [[ $Q_or_A == "question" ]]; then
-        edit_question
-    elif [[ $Q_or_A == "answer" ]]; then
-        edit_answer
-    elif [[ $Q_or_A == "both" ]]; then
-        edit_question
-        edit_answer
+    # Prompt the user to select a card or quit
+    echo "Enter the global line number to edit (or 'q' to quit):"
+    read -r line_number
+
+    if [[ "$line_number" == "q" ]]; then
+        echo "Exiting..."
+        break
+    elif [[ "$line_number" =~ ^[0-9]+$ ]]; then
+        edit_flashcard "$line_number"
     else
-        echo "Invalid option. Please type 'question', 'answer', or 'both'."
-        Q_or_A=""
+        echo "Invalid input. Please enter a valid global line number."
     fi
 done
