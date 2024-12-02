@@ -1,6 +1,8 @@
 # the-team-assignment-team-18-lab-rats
 Team 18 (The Lab Rats)
-
+-------------------------------------
+WANKI: A Bash-Based Flashcard Utility
+-------------------------------------
 Linux command line app (WANKI) that allows the user to create and save flashcards. The flashcards will then be randomly displayed, with the user providing feedback on their difficulty. Flashcards deemed difficult by the user will be displayed more frequently, and easier flashcards will be displayed less frequently. Users can add, edit, and delete flashcards. 
 
 Sub-functionalities: 
