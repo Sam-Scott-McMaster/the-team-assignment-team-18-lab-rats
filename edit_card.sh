@@ -4,11 +4,10 @@
 FILES=("flashcards.txt" "again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
 DIFFICULTIES=("easy" "hard" "again" "good")
 
-# Function to display all cards with global line numbers
 display_cards() {
     echo '-=-=-=-=- CARD LIST -=-=-=-=-'
     local global_line=1  # Start global numbering
-
+    cd WANKI/$1
     # Loop through each file and display the cards with global line numbers
     for file in "${FILES[@]}"; do
         if [[ -f "$file" ]]; then
@@ -29,6 +28,8 @@ get_file_and_local_line() {
     local global_line=1
 
     # Check each file
+    #cd WANKI
+    #ls
     for file in "${FILES[@]}"; do
         if [[ -f "$file" ]]; then
             local line_count=$(wc -l < "$file")  # Count total lines in this file
@@ -39,7 +40,6 @@ get_file_and_local_line() {
                 echo "$file:$local_line"
                 return
             fi
-
             # Update global line for the next file
             global_line=$((global_line + line_count))
         fi
@@ -51,19 +51,25 @@ get_file_and_local_line() {
 
 # Function to edit a specific flashcard
 edit_flashcard() {
+    #ls -b
+    #ls | cat -A
     local global_line=$1
-
     # Find the file and local line for the global line number
     local file_and_local_line
     file_and_local_line=$(get_file_and_local_line "$global_line")
+
     if [[ "$file_and_local_line" == ERROR* ]]; then
         echo "$file_and_local_line"
         return
     fi
+    echo "File and Local Line: $file_and_local_line"
 
     # Extract file name and local line number
     local file=${file_and_local_line%%:*}
     local local_line=${file_and_local_line##*:}
+
+    echo "FILE: $file"
+    echo "LOCAL LINE: $local_line"
 
     # Get the current content of the line
     local current_line=$(sed -n "${local_line}p" "$file")
@@ -126,19 +132,24 @@ edit_flashcard() {
 }
 
 # Main loop
-while true; do
-    display_cards  # Show all cards with global numbering
+edit_card()
+{
+    #ls
+    while true; do
+        display_cards "$1"  # Show all cards with global numbering
+        ls
+        # Prompt the user to select a card or quit
+        echo "Enter the global line number to edit (or 'q' to quit):"
+        read -r line_number
 
-    # Prompt the user to select a card or quit
-    echo "Enter the global line number to edit (or 'q' to quit):"
-    read -r line_number
-
-    if [[ "$line_number" == "q" ]]; then
-        echo "Exiting..."
-        break
-    elif [[ "$line_number" =~ ^[0-9]+$ ]]; then
-        edit_flashcard "$line_number"
-    else
-        echo "Invalid input. Please enter a valid global line number."
-    fi
-done
+        if [[ "$line_number" == "q" ]]; then
+            echo "Exiting..."
+            break
+        elif [[ "$line_number" =~ ^[0-9]+$ ]]; then
+            echo $line_number
+            edit_flashcard "$line_number"
+        else
+            echo "Invalid input. Please enter a valid global line number."
+        fi
+    done
+}
