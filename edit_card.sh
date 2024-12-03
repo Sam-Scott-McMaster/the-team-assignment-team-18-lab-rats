@@ -84,6 +84,12 @@ edit_flashcard() {
     if [[ "$edit_choice" == "question" ]]; then
         echo "Type the new question:"
         read -r new_question
+        while grep -iq "$new_question" flashcards.txt
+        do
+            echo "Error! Question already exists. Please enter a new question: "
+            read -r new_question
+        done
+
         local new_line="${new_question} | ${current_line#*| }"
         sed -i "${local_line}s/.*/${new_line}/" "$file"
         echo "Question updated successfully in $file."
@@ -100,6 +106,11 @@ edit_flashcard() {
     elif [[ "$edit_choice" == "both" ]]; then
         echo "Type the new question:"
         read -r new_question
+        while grep -iq "$new_question" flashcards.txt
+        do
+            echo "Error! Question already exists. Please enter a new question: "
+            read -r new_question
+        done
         echo "Type the new answer:"
         read -r new_answer
         local new_line="${new_question} | ${new_answer}"
