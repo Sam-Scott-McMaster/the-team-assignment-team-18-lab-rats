@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the files for each difficulty level
-FILES=("flashcards.txt" "again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
+FILES=("again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
 DIFFICULTIES=("easy" "hard" "again" "good")
 
 display_cards() {
