@@ -62,14 +62,14 @@ edit_flashcard() {
         echo "$file_and_local_line"
         return
     fi
-    echo "File and Local Line: $file_and_local_line"
+    #echo "File and Local Line: $file_and_local_line"
 
     # Extract file name and local line number
     local file=${file_and_local_line%%:*}
     local local_line=${file_and_local_line##*:}
 
-    echo "FILE: $file"
-    echo "LOCAL LINE: $local_line"
+    #echo "FILE: $file"
+    #echo "LOCAL LINE: $local_line"
 
     # Get the current content of the line
     local current_line=$(sed -n "${local_line}p" "$file")
@@ -84,8 +84,7 @@ edit_flashcard() {
     if [[ "$edit_choice" == "question" ]]; then
         echo "Type the new question:"
         read -r new_question
-        while grep -iq "$new_question" flashcards.txt
-        do
+        while grep -iq "$new_question" "${FILES[@]}"; do
             echo "Error! Question already exists. Please enter a new question: "
             read -r new_question
         done
@@ -106,8 +105,7 @@ edit_flashcard() {
     elif [[ "$edit_choice" == "both" ]]; then
         echo "Type the new question:"
         read -r new_question
-        while grep -iq "$new_question" flashcards.txt
-        do
+        while grep -iq "$new_question" "${FILES[@]}"; do
             echo "Error! Question already exists. Please enter a new question: "
             read -r new_question
         done
@@ -139,14 +137,16 @@ edit_flashcard() {
     # Append the card to the appropriate difficulty file
     local new_file="${new_difficulty}_flashcards.txt"
     echo "$new_line" >> "$new_file"
-    sed -i "$new_line" "flashcards.txt"
+    #echo $new_line
+    sed -i "${local_line}d" "flashcards.txt"
+    echo "$new_line" >> "flashcards.txt"
     echo "Card moved to $new_difficulty deck."
 }
 
 # Main loop
 while true; do
     display_cards "$1"  # Show all cards with global numbering
-    ls
+    #ls
     # Prompt the user to select a card or quit
     echo "Enter the global line number to edit (or 'q' to quit):"
     read -r line_number
@@ -156,6 +156,7 @@ while true; do
         break
     elif [[ "$line_number" =~ ^[0-9]+$ ]]; then
         echo $line_number
+        clear
         edit_flashcard "$line_number"
     else
         echo "Invalid input. Please enter a valid global line number."
