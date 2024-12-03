@@ -128,6 +128,7 @@ edit_flashcard() {
     # Append the card to the appropriate difficulty file
     local new_file="${new_difficulty}_flashcards.txt"
     echo "$new_line" >> "$new_file"
+    echo "$new_line" >> flashcards.txt
     echo "Card moved to $new_difficulty deck."
 }
 
