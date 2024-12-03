@@ -7,7 +7,7 @@ DIFFICULTIES=("easy" "hard" "again" "good")
 display_cards() {
     echo '-=-=-=-=- CARD LIST -=-=-=-=-'
     local global_line=1  # Start global numbering
-    cd WANKI/$1
+    #cd WANKI/$1
     # Loop through each file and display the cards with global line numbers
     for file in "${FILES[@]}"; do
         if [[ -f "$file" ]]; then
@@ -128,29 +128,25 @@ edit_flashcard() {
     # Append the card to the appropriate difficulty file
     local new_file="${new_difficulty}_flashcards.txt"
     echo "$new_line" >> "$new_file"
-    echo "$new_line" >> flashcards.txt
+    sed -i "$new_line" "flashcards.txt"
     echo "Card moved to $new_difficulty deck."
 }
 
 # Main loop
-edit_card()
-{
-    #ls
-    while true; do
-        display_cards "$1"  # Show all cards with global numbering
-        ls
-        # Prompt the user to select a card or quit
-        echo "Enter the global line number to edit (or 'q' to quit):"
-        read -r line_number
+while true; do
+    display_cards "$1"  # Show all cards with global numbering
+    ls
+    # Prompt the user to select a card or quit
+    echo "Enter the global line number to edit (or 'q' to quit):"
+    read -r line_number
 
-        if [[ "$line_number" == "q" ]]; then
-            echo "Exiting..."
-            break
-        elif [[ "$line_number" =~ ^[0-9]+$ ]]; then
-            echo $line_number
-            edit_flashcard "$line_number"
-        else
-            echo "Invalid input. Please enter a valid global line number."
-        fi
-    done
-}
+    if [[ "$line_number" == "q" ]]; then
+        echo "Exiting..."
+        break
+    elif [[ "$line_number" =~ ^[0-9]+$ ]]; then
+        echo $line_number
+        edit_flashcard "$line_number"
+    else
+        echo "Invalid input. Please enter a valid global line number."
+    fi
+done
