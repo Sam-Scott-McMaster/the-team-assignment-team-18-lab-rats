@@ -38,24 +38,19 @@ cleanup_test_files() {
 
 reset_card_tests()
 {
-    rm again_flashcards.txt
-    rm easy_flashcards.txt
-    rm good_flashcards.txt
-    rm hard_flashcards.txt
     FILES=("again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
     DIFFICULTIES=("easy" "hard" "again" "good")
-    echo "RESETTING"
     for difficulty in "${DIFFICULTIES[@]}"; do
         > "${difficulty}_flashcards.txt"  # Clear or create the file
         for i in {1..10}; do
             echo "Question ${i} from ${difficulty} | Answer ${i} from ${difficulty}" >> "${difficulty}_flashcards.txt"
         done
     done
-    echo "DONE"
 }
 
 test() {
-    tc=tc+1
+
+    ((tc++))
 
     local COMMAND=$1
     local RETURN=$2
@@ -63,6 +58,7 @@ test() {
     local STDOUT=$4
     local STDERR=$5
 
+    reset_card_tests
     # CHECK RETURN VALUE
     $COMMAND <<< "$STDIN" >/dev/null 2>/dev/null
     local A_RETURN=$?
@@ -72,35 +68,35 @@ test() {
         echo "   $COMMAND"
         echo "   Expected Return: $RETURN"
         echo "   Actual Return: $A_RETURN"
-        fails=$fails+1
+        ((fails++))
         return 1
     fi
 
-    # CHECK STDOUT
-    local A_STDOUT=$($COMMAND <<< "$STDIN" 2>/dev/null)
 
-    # Remove leading/trailing whitespace for comparison
-    if [[ "$(echo "$STDOUT" | tr -d '[:space:]')" != "$(echo "$A_STDOUT" | tr -d '[:space:]')" ]]; then
+    reset_card_tests
+    # CHECK STDOUT
+    A_STDOUT=$($COMMAND <<< "$STDIN" 2>/dev/null)
+    if [[ "$STDOUT" != "$A_STDOUT" ]]; then
         echo "Test $tc Failed"
         echo "   $COMMAND"
         echo "   Expected STDOUT: $STDOUT"
         echo "   Actual STDOUT: $A_STDOUT"
-        fails=$fails+1
+        ((fails++))
         return 2
     fi
-    
+    reset_card_tests
     # CHECK STDERR
     local A_STDERR=$($COMMAND <<< "$STDIN" 2>&1 >/dev/null)
-
     if [[ "$STDERR" != "$A_STDERR" ]]; then
         echo "Test $tc Failed"
         echo "   $COMMAND"
         echo "   Expected STDERR: $STDERR"
         echo "   Actual STDERR: $A_STDERR"
-        fails=$fails+1
+        ((fails++))
         return 3
     fi
     
+    reset_card_tests
     # SUCCESS
     echo "Test $tc Passed"
     return 0
@@ -113,14 +109,12 @@ test() {
 # Setup test environment
 #create_test_files
 
-reset_card_tests
-
-
 # Test case: Edit a flashcard successfully
 test './testing_edit' 0 '1
 question
 New Question
-easy' '1: Question 2 from again | Answer 2 from again
+easy
+' '1: Question 2 from again | Answer 2 from again
 2: Question 3 from again | Answer 3 from again
 3: Question 4 from again | Answer 4 from again
 4: Question 5 from again | Answer 5 from again
@@ -160,17 +154,13 @@ easy' '1: Question 2 from again | Answer 2 from again
 38: Question 9 from easy | Answer 9 from easy
 39: Question 10 from easy | Answer 10 from easy
 40: New Question | Answer 1 from again' ''
-echo "TEST 1"
-reset_card_tests
 # Test case: Edit a flashcard with an invalid line number
 test './testing_edit' 1 '100' 'ERROR: Line 100 not found.' ''
-reset_card_tests
 # Test case: Edit a flashcard with an invalid difficulty
 test './testing_edit' 1 '1
 question
 New Question
-invalid_difficulty' 'Invalid difficulty' ''
-reset_card_tests
+invalid_difficulty' 'Invalid difficulty.' ''
 # Test case: Edit both question and answer
 test './testing_edit' 0 '1
 both
