@@ -1,3 +1,10 @@
-What is something that moves a system away from its set point called? | stimulus
-What does a detector or receptor do in homeostasis? | detect change in a variable from its setpoint
-What is the optic nerve composed of and what does it do? | formed from axons of cells within the retina. It transmits visual info to the cortex.
+Question 1 from good | Answer 1 from good
+Question 2 from good | Answer 2 from good
+Question 3 from good | Answer 3 from good
+Question 4 from good | Answer 4 from good
+Question 5 from good | Answer 5 from good
+Question 6 from good | Answer 6 from good
+Question 7 from good | Answer 7 from good
+Question 8 from good | Answer 8 from good
+Question 9 from good | Answer 9 from good
+Question 10 from good | Answer 10 from good

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+rm again_flashcards.txt
+rm easy_flashcards.txt
+rm good_flashcards.txt
+rm hard_flashcards.txt
+FILES=("again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
+DIFFICULTIES=("easy" "hard" "again" "good")
+echo "RESETTING"
+for difficulty in "${DIFFICULTIES[@]}"; do
+    > "${difficulty}_flashcards.txt"  # Clear or create the file
+    for i in {1..10}; do
+        echo "Question ${i} from ${difficulty} | Answer ${i} from ${difficulty}" >> "${difficulty}_flashcards.txt"
+    done
+done
+echo "DONE"

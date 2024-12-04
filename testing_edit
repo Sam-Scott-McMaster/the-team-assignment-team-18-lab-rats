@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# Define the files for each difficulty level
+FILES=("again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
+DIFFICULTIES=("easy" "hard" "again" "good")
+
+# Display all cards with global numbering
+display_cards() {
+    local global_line=1  # Start global numbering
+    for file in "${FILES[@]}"; do
+        if [[ -f "$file" ]]; then
+            while IFS= read -r line; do
+                echo "$global_line: $line"  # Keep global line numbers for testing
+                global_line=$((global_line + 1))  # Increment global line count
+            done < "$file"
+        fi
+    done
+}
+
+# Get the file and local line for a global line number
+get_file_and_local_line() {
+    local target_global_line=$1
+    local global_line=1
+    for file in "${FILES[@]}"; do
+        if [[ -f "$file" ]]; then
+            local line_count=$(wc -l < "$file")  # Count total lines in this file
+            if (( target_global_line >= global_line && target_global_line < global_line + line_count )); then
+                echo "$file:$((target_global_line - global_line + 1))"  # Return file:local_line
+                return
+            fi
+            global_line=$((global_line + line_count))  # Update global line count
+        fi
+    done
+    echo "ERROR: Line $target_global_line not found."
+}
+
+# Edit a specific flashcard
+edit_flashcard() {
+    local global_line=$1
+    local file_and_local_line
+    file_and_local_line=$(get_file_and_local_line "$global_line")
+
+    if [[ "$file_and_local_line" == ERROR* ]]; then
+        echo "$file_and_local_line"
+        return 1
+    fi
+
+    local file=${file_and_local_line%%:*}
+    local local_line=${file_and_local_line##*:}
+
+    local current_line=$(sed -n "${local_line}p" "$file")  # Get current line content
+
+    read -r edit_choice  # Read edit choice (question/answer/both)
+
+    if [[ "$edit_choice" == "question" ]]; then
+        read -r new_question
+        while grep -iq "$new_question" "${FILES[@]}"; do
+            read -r new_question
+        done
+        sed -i "${local_line}s/.*/${new_question} | ${current_line#*| }/" "$file"
+
+    elif [[ "$edit_choice" == "answer" ]]; then
+        read -r new_answer
+        sed -i "${local_line}s/.*/${current_line%| *} | ${new_answer}/" "$file"
+
+    elif [[ "$edit_choice" == "both" ]]; then
+        read -r new_question
+        while grep -iq "$new_question" "${FILES[@]}"; do
+            read -r new_question
+        done
+        read -r new_answer
+        sed -i "${local_line}s/.*/${new_question} | ${new_answer}/" "$file"
+    else
+        echo "Invalid choice."
+        return 1
+    fi
+
+    read -r new_difficulty  # Read new difficulty
+    if [[ ! " ${DIFFICULTIES[@]} " =~ " ${new_difficulty} " ]]; then
+        echo "Invalid difficulty."
+        return 1
+    fi
+
+    sed -i "${local_line}d" "$file"  # Remove from current file
+    echo "${new_question:-${current_line%| *}} | ${new_answer:-${current_line#*| }}" >> "${new_difficulty}_flashcards.txt"
+    display_cards
+    return 0
+}
+
+# Main loop for testing
+#display_cards
+read -r line_number
+if [[ "$line_number" == "q" ]]; then
+    break
+elif [[ "$line_number" =~ ^[0-9]+$ ]]; then
+    edit_flashcard "$line_number"
+fi
+#display_cards

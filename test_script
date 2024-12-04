@@ -1,0 +1,269 @@
+#!/bin/bash
+
+# Define the files for each difficulty level
+
+
+# GLOBALS: tc = test case number, fails = number of failed cases
+declare -i tc=0
+declare -i fails=0
+
+############################################
+# Create test files with 10 flashcards each
+create_test_files() {
+
+    echo "CREATING TEST FILES"
+    for difficulty in "${DIFFICULTIES[@]}"; do
+        > "${difficulty}_flashcards.txt"  # Clear or create the file
+        for i in {1..10}; do
+            echo "Question ${i} from ${difficulty} | Answer ${i} from ${difficulty}" >> "${difficulty}_flashcards.txt"
+        done
+    done
+}
+
+# Clean up test files
+cleanup_test_files() {
+    rm -f "${FILES[@]}"
+}
+
+############################################
+# Run a single test. Runs a given command to check the return value, stdout, and stderr
+#
+# GLOBALS: tc, fails
+# PARAMS: $1 = command
+#         $2 = expected return value
+#         $3 = standard input text to send
+#         $4 = expected stdout
+#         $5 = expected stderr
+############################################
+
+reset_card_tests()
+{
+    rm again_flashcards.txt
+    rm easy_flashcards.txt
+    rm good_flashcards.txt
+    rm hard_flashcards.txt
+    FILES=("again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
+    DIFFICULTIES=("easy" "hard" "again" "good")
+    echo "RESETTING"
+    for difficulty in "${DIFFICULTIES[@]}"; do
+        > "${difficulty}_flashcards.txt"  # Clear or create the file
+        for i in {1..10}; do
+            echo "Question ${i} from ${difficulty} | Answer ${i} from ${difficulty}" >> "${difficulty}_flashcards.txt"
+        done
+    done
+    echo "DONE"
+}
+
+test() {
+    tc=tc+1
+
+    local COMMAND=$1
+    local RETURN=$2
+    local STDIN=$3
+    local STDOUT=$4
+    local STDERR=$5
+
+    # CHECK RETURN VALUE
+    $COMMAND <<< "$STDIN" >/dev/null 2>/dev/null
+    local A_RETURN=$?
+
+    if [[ "$A_RETURN" != "$RETURN" ]]; then
+        echo "Test $tc Failed"
+        echo "   $COMMAND"
+        echo "   Expected Return: $RETURN"
+        echo "   Actual Return: $A_RETURN"
+        fails=$fails+1
+        return 1
+    fi
+
+    # CHECK STDOUT
+    local A_STDOUT=$($COMMAND <<< "$STDIN" 2>/dev/null)
+
+    # Remove leading/trailing whitespace for comparison
+    if [[ "$(echo "$STDOUT" | tr -d '[:space:]')" != "$(echo "$A_STDOUT" | tr -d '[:space:]')" ]]; then
+        echo "Test $tc Failed"
+        echo "   $COMMAND"
+        echo "   Expected STDOUT: $STDOUT"
+        echo "   Actual STDOUT: $A_STDOUT"
+        fails=$fails+1
+        return 2
+    fi
+    
+    # CHECK STDERR
+    local A_STDERR=$($COMMAND <<< "$STDIN" 2>&1 >/dev/null)
+
+    if [[ "$STDERR" != "$A_STDERR" ]]; then
+        echo "Test $tc Failed"
+        echo "   $COMMAND"
+        echo "   Expected STDERR: $STDERR"
+        echo "   Actual STDERR: $A_STDERR"
+        fails=$fails+1
+        return 3
+    fi
+    
+    # SUCCESS
+    echo "Test $tc Passed"
+    return 0
+}
+
+############################################
+# Test Cases
+############################################
+
+# Setup test environment
+#create_test_files
+
+reset_card_tests
+
+
+# Test case: Edit a flashcard successfully
+test './testing_edit' 0 '1
+question
+New Question
+easy' '1: Question 2 from again | Answer 2 from again
+2: Question 3 from again | Answer 3 from again
+3: Question 4 from again | Answer 4 from again
+4: Question 5 from again | Answer 5 from again
+5: Question 6 from again | Answer 6 from again
+6: Question 7 from again | Answer 7 from again
+7: Question 8 from again | Answer 8 from again
+8: Question 9 from again | Answer 9 from again
+9: Question 10 from again | Answer 10 from again
+10: Question 1 from hard | Answer 1 from hard
+11: Question 2 from hard | Answer 2 from hard
+12: Question 3 from hard | Answer 3 from hard
+13: Question 4 from hard | Answer 4 from hard
+14: Question 5 from hard | Answer 5 from hard
+15: Question 6 from hard | Answer 6 from hard
+16: Question 7 from hard | Answer 7 from hard
+17: Question 8 from hard | Answer 8 from hard
+18: Question 9 from hard | Answer 9 from hard
+19: Question 10 from hard | Answer 10 from hard
+20: Question 1 from good | Answer 1 from good
+21: Question 2 from good | Answer 2 from good
+22: Question 3 from good | Answer 3 from good
+23: Question 4 from good | Answer 4 from good
+24: Question 5 from good | Answer 5 from good
+25: Question 6 from good | Answer 6 from good
+26: Question 7 from good | Answer 7 from good
+27: Question 8 from good | Answer 8 from good
+28: Question 9 from good | Answer 9 from good
+29: Question 10 from good | Answer 10 from good
+30: Question 1 from easy | Answer 1 from easy
+31: Question 2 from easy | Answer 2 from easy
+32: Question 3 from easy | Answer 3 from easy
+33: Question 4 from easy | Answer 4 from easy
+34: Question 5 from easy | Answer 5 from easy
+35: Question 6 from easy | Answer 6 from easy
+36: Question 7 from easy | Answer 7 from easy
+37: Question 8 from easy | Answer 8 from easy
+38: Question 9 from easy | Answer 9 from easy
+39: Question 10 from easy | Answer 10 from easy
+40: New Question | Answer 1 from again' ''
+echo "TEST 1"
+reset_card_tests
+# Test case: Edit a flashcard with an invalid line number
+test './testing_edit' 1 '100' 'ERROR: Line 100 not found.' ''
+reset_card_tests
+# Test case: Edit a flashcard with an invalid difficulty
+test './testing_edit' 1 '1
+question
+New Question
+invalid_difficulty' 'Invalid difficulty' ''
+reset_card_tests
+# Test case: Edit both question and answer
+test './testing_edit' 0 '1
+both
+Updated Question
+Updated Answer
+hard' '1: Question 2 from again | Answer 2 from again
+2: Question 3 from again | Answer 3 from again
+3: Question 4 from again | Answer 4 from again
+4: Question 5 from again | Answer 5 from again
+5: Question 6 from again | Answer 6 from again
+6: Question 7 from again | Answer 7 from again
+7: Question 8 from again | Answer 8 from again
+8: Question 9 from again | Answer 9 from again
+9: Question 10 from again | Answer 10 from again
+10: Question 1 from hard | Answer 1 from hard
+11: Question 2 from hard | Answer 2 from hard
+12: Question 3 from hard | Answer 3 from hard
+13: Question 4 from hard | Answer 4 from hard
+14: Question 5 from hard | Answer 5 from hard
+15: Question 6 from hard | Answer 6 from hard
+16: Question 7 from hard | Answer 7 from hard
+17: Question 8 from hard | Answer 8 from hard
+18: Question 9 from hard | Answer 9 from hard
+19: Question 10 from hard | Answer 10 from hard
+20: Updated Question | Updated Answer
+21: Question 1 from good | Answer 1 from good
+22: Question 2 from good | Answer 2 from good
+23: Question 3 from good | Answer 3 from good
+24: Question 4 from good | Answer 4 from good
+25: Question 5 from good | Answer 5 from good
+26: Question 6 from good | Answer 6 from good
+27: Question 7 from good | Answer 7 from good
+28: Question 8 from good | Answer 8 from good
+29: Question 9 from good | Answer 9 from good
+30: Question 10 from good | Answer 10 from good
+31: Question 1 from easy | Answer 1 from easy
+32: Question 2 from easy | Answer 2 from easy
+33: Question 3 from easy | Answer 3 from easy
+34: Question 4 from easy | Answer 4 from easy
+35: Question 5 from easy | Answer 5 from easy
+36: Question 6 from easy | Answer 6 from easy
+37: Question 7 from easy | Answer 7 from easy
+38: Question 8 from easy | Answer 8 from easy
+39: Question 9 from easy | Answer 9 from easy
+40: Question 10 from easy | Answer 10 from easy' ''
+reset_card_tests
+# Test case: Edit answer only
+test './testing_edit' 0 '2
+answer
+Updated Answer
+good' '1: Question 1 from again | Answer 1 from again
+2: Question 3 from again | Answer 3 from again
+3: Question 4 from again | Answer 4 from again
+4: Question 5 from again | Answer 5 from again
+5: Question 6 from again | Answer 6 from again
+6: Question 7 from again | Answer 7 from again
+7: Question 8 from again | Answer 8 from again
+8: Question 9 from again | Answer 9 from again
+9: Question 10 from again | Answer 10 from again
+10: Question 1 from hard | Answer 1 from hard
+11: Question 2 from hard | Answer 2 from hard
+12: Question 3 from hard | Answer 3 from hard
+13: Question 4 from hard | Answer 4 from hard
+14: Question 5 from hard | Answer 5 from hard
+15: Question 6 from hard | Answer 6 from hard
+16: Question 7 from hard | Answer 7 from hard
+17: Question 8 from hard | Answer 8 from hard
+18: Question 9 from hard | Answer 9 from hard
+19: Question 10 from hard | Answer 10 from hard
+20: Question 1 from good | Answer 1 from good
+21: Question 2 from good | Answer 2 from good
+22: Question 3 from good | Answer 3 from good
+23: Question 4 from good | Answer 4 from good
+24: Question 5 from good | Answer 5 from good
+25: Question 6 from good | Answer 6 from good
+26: Question 7 from good | Answer 7 from good
+27: Question 8 from good | Answer 8 from good
+28: Question 9 from good | Answer 9 from good
+29: Question 10 from good | Answer 10 from good
+30: Question 2 from again  | Updated Answer
+31: Question 1 from easy | Answer 1 from easy
+32: Question 2 from easy | Answer 2 from easy
+33: Question 3 from easy | Answer 3 from easy
+34: Question 4 from easy | Answer 4 from easy
+35: Question 5 from easy | Answer 5 from easy
+36: Question 6 from easy | Answer 6 from easy
+37: Question 7 from easy | Answer 7 from easy
+38: Question 8 from easy | Answer 8 from easy
+39: Question 9 from easy | Answer 9 from easy
+40: Question 10 from easy | Answer 10 from easy' ''
+reset_card_tests
+# Clean up test environment
+#cleanup_test_files
+
+# Return the number of failed test cases
+exit $fails
