@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# This program is a copy of the edit_card script used to edit cards in the WANKI script, however it is
+# without all the print statements to optimize testing the script. Before every test, a new set of 
+# flashcards are made to test on, which consists of "Question ${i} from ${difficulty} | Answer ${i} from ${difficulty}"
+# which is then modified, and tested in the test_script. The only thing printed in this script is the final output of the
+# changed flashcards deck, which proves that the edit function works to change cards. 
+
+
 # Define the files for each difficulty level
 FILES=("again_flashcards.txt" "hard_flashcards.txt" "good_flashcards.txt" "easy_flashcards.txt")
 DIFFICULTIES=("easy" "hard" "again" "good")
